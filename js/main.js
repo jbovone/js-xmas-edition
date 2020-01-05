@@ -1,28 +1,17 @@
 const $form = document.querySelector('#carta-a-santa')
-const ciudad = $form.ciudad.value                                       //document.querySelector('[name=ciudad]').value
-const nombre = $form.nombre.value
-const comportamiento = $form.comportamiento.value
-const descripcionRegalo = $form['descripcion-regalo'].value             //$form.descripcion-regalo.value===syntax error
-const $exito = document.querySelector('#exito')
-const $errores = document.querySelector('#errores')
-const $enviarCarta = document.querySelector('#enviar-carta')
-
-//console.log(nombre + ciudad + comportamiento + descripcionRegalo)
-//console.log(document.querySelector('[name=nombre]').value)
-//console.log(validarNombre(""))
-
+$form.onsubmit = validarForm;
 
 function validarNombre(nombre) {
     if (nombre.length === 0) {
-        return 'Este campo debe tener al menos 1 caracter'
+        return 'El campo nombre debe tener al menos 1 caracter'
     }
 
     if (nombre.length >= 10) {
-        return 'Este campo no puede tener mas de 10 caracteres'  
+        return 'El campo nombre no puede tener mas de 10 caracteres'
     }
 
-    if (!/^[A-z]+[A-z]+[^_]$/.test(`${nombre}`)) {   //este if estaba pensado para mostrar este error Y los otros si los hubiera, pero return termina la funcion, probablemente necesite una funcion aparte. Plus el REGex podria mirarse un poco mas.
-        return 'Este campo solo puede tener letras'
+    if (!/^[A-z]+$/.test(`${nombre}`)) {
+        return 'El campo nombre solo puede tener letras'
     }
     return ''
 }
@@ -40,70 +29,88 @@ function validarDescripcionRegalo(descripcionRegalo) {
     if (descripcionRegalo.length === 0) {
         return 'La descripcion del regalo no puede quedar vacia'
     }
-    if (descripcionRegalo.length >= 100) {
+    if (descripcionRegalo.length > 100) {
         return 'La descripcion del regalo no puede superar los 100 caracteres'
     }
     return ''
 }
 
 
-
-
-$enviarCarta.onclick = function (event) {
+function validarForm(event) {
     
-    
-    validarForm( )
+    const ciudad = $form.ciudad.value
+    const nombre = $form.nombre.value
+    const descripcionRegalo = $form['descripcion-regalo'].value
+
+    let errorNombre = validarNombre(nombre)
+    let errorCiudad = validarCiudad(ciudad)
+    let errorDescripcionRegalo = validarDescripcionRegalo(descripcionRegalo)
+
+    let errores = {
+        nombre: errorNombre,
+        ciudad: errorCiudad,
+        'descripcion-regalo': errorDescripcionRegalo
+    }
+    manejarErrores(errores)
     event.preventDefault()
 }
 
 
+function manejarErrores(errores) {
 
-function validarForm() {
-    let signalGreenFlag = 0
+    const $exito = document.querySelector('#exito')
+    let keys = Object.keys(errores)
+    let cuentaErrores = 0
 
-    if (validarNombre(nombre) !== '') {
-        manejarErrores(validarNombre(nombre))
-    }
-    else (signalGreenFlag++)
+    keys.forEach(
+        function (key) {
+            let error = errores[key]
 
+            if (error !== '') {
+                $form[key].className = 'error'
+                manejarListaError(error, key)
+                cuentaErrores++
 
-    if (validarCiudad(ciudad) !== '') {
-        manejarErrores(validarCiudad(ciudad))
-    }
-    else (signalGreenFlag++)
+            } else {
+                $form[key].className = ''
+                manejarListaError(error, key) 
+            }
+        }
+    )
 
-
-    if (validarDescripcionRegalo(descripcionRegalo) !== '') {
-        manejarErrores(validarDescripcionRegalo(descripcionRegalo))
-    }
-    else (signalGreenFlag++)
-
-    if (signalGreenFlag === 3) {
+    if (cuentaErrores === 0) {
         $exito.className = ''
+        setTimeout(irA, 5000)
+        function irA(){
+            window.location.assign('wishlist.html')
+        }    
+    }
+}
+
+
+function manejarListaError(error, key) {
+    
+    let $error = document.querySelector(`#error-${key}`) || 'no-existe'
+    const $errorLista = document.querySelector('#errores')
+
+    if ($error === 'no-existe' && error !== '') {
+
+        $error = document.createElement('li')
+        $error.innerText = error
+        $error.id = `error-${key}`
+        $errorLista.appendChild($error)
     }
     
-}
-
-
-function manejarErrores(errores) {
-    let arrayErrores = []
-    arrayErrores.push(errores)
-
-    for (let i = 0; i < arrayErrores.length; i++) {
-        $errores.appendChild(
-            document.createTextNode(arrayErrores[i])
-        )
-        $errores.appendChild(
-            document.createElement('br')
-        )
-
+    if ($error !== 'no-existe' && error === '') {
+        $errorLista.removeChild($error)
     }
 }
 
 
 
 
-//  /define RegEX/
+//==============================================RegEx=============================================
+//  /define RegEX/ 
 //  .test(' aca inserta contra que se prueba la RegEX') 
 //
 //
@@ -116,3 +123,4 @@ function manejarErrores(errores) {
 // [A-z] === La secuencia no es case sensitive.
 // . === Cualquier Caracter
 // \ === deshace el status de modificador del siguiente caracter para poder usarlo como argumento. \\ se desmodifica a si mismo?
+
