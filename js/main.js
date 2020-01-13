@@ -6,11 +6,11 @@ function validarNombre(nombre) {
         return 'El campo nombre debe tener al menos 1 caracter'
     }
 
-    if (nombre.length >= 10) {
+    if (nombre.length > 10) {
         return 'El campo nombre no puede tener mas de 10 caracteres'
     }
 
-    if (!/^[A-z]+$/.test(`${nombre}`)) {
+    if (!/^[a-z]+$/i.test(`${nombre}`)) {
         return 'El campo nombre solo puede tener letras'
     }
     return ''
@@ -55,72 +55,44 @@ function validarForm(event) {
     event.preventDefault()
 }
 
+let cuentaErrores = 0
 
 function manejarErrores(errores) {
 
     const $exito = document.querySelector('#exito')
     let keys = Object.keys(errores)
-    let cuentaErrores = 0
+    
 
     keys.forEach(
         function (key) {
             let error = errores[key]
-
-            if (error !== '') {
+            let $error = document.querySelector(`#error-${key}`)
+            const $errorLista = document.querySelector('#errores')
+        
+            if (!$error && error !== '') {
                 $form[key].className = 'error'
-                manejarListaError(error, key)
+                $error = document.createElement('li')
+                $error.innerText = error
+                $error.id = `error-${key}`
+                $errorLista.appendChild($error)
                 cuentaErrores++
-
-            } else {
+            }
+            
+            if ($error && error === '') {
+                $errorLista.removeChild($error)
                 $form[key].className = ''
-                manejarListaError(error, key) 
+                cuentaErrores--
             }
         }
     )
-
+        
     if (cuentaErrores === 0) {
         $exito.className = ''
-        setTimeout(irA, 5000)
-        function irA(){
-            window.location.assign('wishlist.html')
-        }    
+        setTimeout(irAWishlist, 5000)
+       
     }
 }
 
-
-function manejarListaError(error, key) {
-    
-    let $error = document.querySelector(`#error-${key}`) || 'no-existe'
-    const $errorLista = document.querySelector('#errores')
-
-    if ($error === 'no-existe' && error !== '') {
-
-        $error = document.createElement('li')
-        $error.innerText = error
-        $error.id = `error-${key}`
-        $errorLista.appendChild($error)
-    }
-    
-    if ($error !== 'no-existe' && error === '') {
-        $errorLista.removeChild($error)
-    }
-}
-
-
-
-
-//==============================================RegEx=============================================
-//  /define RegEX/ 
-//  .test(' aca inserta contra que se prueba la RegEX') 
-//
-//
-// [] === argumento referido a secuencias [a-z] [0-9] etc [lunes domingo] not!xD y acepta parametros aislados ej [a-z_]
-// $ === termina con  
-// ^ === empieza con
-// + === contiene aunque sea un
-// {2,3} === modifica el argumento previo pidiendo tantos elementos como el rango definido
-// /i === TODO lo anterior NO ES case sensitive
-// [A-z] === La secuencia no es case sensitive.
-// . === Cualquier Caracter
-// \ === deshace el status de modificador del siguiente caracter para poder usarlo como argumento. \\ se desmodifica a si mismo?
-
+function irAWishlist(){
+    window.location.assign('wishlist.html')
+}    
